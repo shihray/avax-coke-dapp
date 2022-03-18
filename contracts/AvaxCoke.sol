@@ -3,21 +3,18 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-
+import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 contract AvaxCoke is Context,  AccessControlEnumerable, ERC721Enumerable, ERC721URIStorage{
   using Counters for Counters.Counter;
   Counters.Counter public _tokenIdTracker;
 
   string private _baseTokenURI;
-  uint256 private _price;
+  uint256 private _price = 0.025 ether;
   uint private _max;
   address private _admin;
   address private _admin2;
@@ -27,9 +24,8 @@ contract AvaxCoke is Context,  AccessControlEnumerable, ERC721Enumerable, ERC721
   mapping (uint256 => uint256) public lastDividendAt;
   mapping (uint256 => address ) public minter;
 
-  constructor(string memory name, string memory symbol, string memory baseTokenURI, uint256 mintPrice, uint max, address admin, address admin2) ERC721(name, symbol) {
+  constructor(string memory baseTokenURI, uint max, address admin, address admin2) ERC721("AvaxCoke Tokens", "ACT") {
       _baseTokenURI = baseTokenURI;
-      _price = mintPrice;
       _max = max;
       _admin = admin;
       _admin2 = admin2;
@@ -56,20 +52,23 @@ contract AvaxCoke is Context,  AccessControlEnumerable, ERC721Enumerable, ERC721
     _price = mintPrice;
   }
 
-  function price() public view returns (uint) {
+  function price() public view returns (uint256) {
     return _price;
   }
 
-  function mint(uint amount) public payable {
-    require(msg.value == _price*amount, "AvaxCoke: must send correct price");
-    require(_tokenIdTracker.current() + amount <= _max, "AvaxCoke: not enough avax apes left to mint amount");
-    for(uint i=0; i < amount; i++){
-      _mint(msg.sender, _tokenIdTracker.current());
-      minter[_tokenIdTracker.current()] = msg.sender;
-      lastDividendAt[_tokenIdTracker.current()] = totalDividend;
-      _tokenIdTracker.increment();
-      splitBalance(msg.value/amount);
-    }
+  function mint() public payable returns (uint) {
+
+    uint256 currIndex = _tokenIdTracker.current();
+
+    require(msg.value == _price, "AvaxCoke: must send correct price");
+    require(currIndex <= _max, "AvaxCoke: not enough avax apes left to mint amount");
+    _mint(msg.sender, currIndex);
+    minter[currIndex] = msg.sender;
+    lastDividendAt[currIndex] = totalDividend;
+    _tokenIdTracker.increment();
+    splitBalance(msg.value);
+
+    return currIndex;
   }
 
   function tokenMinter(uint256 tokenId) public view returns(address){

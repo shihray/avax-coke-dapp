@@ -17,6 +17,11 @@ function MyApp({ Component, pageProps }) {
               Sell NFT
             </a>
           </Link>
+          <Link href="/mint-nft">
+            <a className="mr-6 text-pink-500">
+              Mint NFT
+            </a>
+          </Link>
           <Link href="/my-nfts">
             <a className="mr-6 text-pink-500">
               My NFTs

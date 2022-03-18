@@ -13,3 +13,18 @@ npx hardhat node
 node scripts/sample-script.js
 npx hardhat help
 ```
+
+To spin up a local network, open your terminal and run the following command:
+```shell
+npx hardhat node
+```
+
+In a separate window, run the following command:
+```shell
+npx hardhat run scripts/deploy.js --network localhost
+```
+
+To start the app, run the following command in your CLI:
+```shell
+npm run dev
+```
