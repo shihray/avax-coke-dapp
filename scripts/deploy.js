@@ -13,8 +13,15 @@ async function main() {
     await avaxCoke.deployed();
     console.log("Avax Coke deployed to:", avaxCoke.address);
 
-    fs.writeFileSync('./config.js', `export const marketplaceAddress = "${nftMarketplace.address}"\n
-    export const avaxCokeAddress = "${avaxCoke.address}"`)
+    const Market = await hre.ethers.getContractFactory("Market");
+    const market = await Market.deploy(avaxCoke.address, 1, 3);
+    await market.deployed();
+    console.log("Market deployed to:", market.address);
+
+    fs.writeFileSync('./config.js', 
+`export const marketplaceAddress = "${nftMarketplace.address}"
+export const avaxCokeAddress = "${avaxCoke.address}"
+export const marketAddress = "${market.address}"`)
 }
 
 main()
